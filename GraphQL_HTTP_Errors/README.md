@@ -1,7 +1,7 @@
 # Zabbix Template GraphQL
 ## Descrição
 
-Template para coleta de Metricas do GraphQL
+Template para coleta da quantidade de erros HTTP utilizando o GraphQL
 
 ## Versões testadas
 Zabbix Versão 7 ou superior<br>
