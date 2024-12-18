@@ -1,2 +1,2 @@
-# Zabbix Templates
+# Repositorio de Templates Zabbix não oficiais
 
