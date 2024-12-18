@@ -4,9 +4,9 @@ Template para coleta de Metricas do GraphQL
 
 <p>Macros utilizadas:</p>
 {$TOKEN} - Token para acesso a API do GraphQL<br>
-{$URL} - Endereço API Metrics do Graphql. Ex : https://api.graphql/metrics/graphql <br>
+{$URL} - Endereço API Metrics do Graphql. Ex : https://api.graphql/metrics/graphql
 
-Itens do tipo Script<br>
+<br>Itens do tipo Script<br>
 
 Raw HTTP 400 Errors<br>
 Raw HTTP 500 Errors<br>
