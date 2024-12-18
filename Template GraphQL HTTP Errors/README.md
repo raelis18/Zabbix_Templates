@@ -18,8 +18,8 @@ Zabbix Versão 7 ou superior<br>
 
 ## Itens do tipo Script
 
-1. Raw HTTP 400 Errors
-2. Raw HTTP 500 Errors
+Raw HTTP 400 Errors.
+Raw HTTP 500 Errors.
 
 ## Itens dependentes
 
