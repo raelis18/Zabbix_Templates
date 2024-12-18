@@ -1,17 +1,27 @@
 # Zabbix Template GraphQL
-Zabbix Versão 7 ou superior<br>
+## Descrição
+
 Template para coleta de Metricas do GraphQL
 
-<p>Macros utilizadas:</p>
-{$TOKEN} - Token para acesso a API do GraphQL<br>
-{$URL} - Endereço API Metrics do Graphql. Ex : https://api.graphql/metrics/graphql
+## Versões testadas
+Zabbix Versão 7 ou superior<br>
 
-<br>Itens do tipo Script<br>
+## Configuração
 
-Raw HTTP 400 Errors<br>
-Raw HTTP 500 Errors<br>
+1. Realizar a importação do template no Zabbix 
+2. Preencher as macros necessarias
 
-Itens dependentes<br>
+## Macros utilizadas
+
+1. {$TOKEN} - Token para acesso a API do GraphQL.
+2. {$URL} - Endereço API Metrics do Graphql. Ex : https://api.graphql/metrics/graphql.
+
+## Itens do tipo Script
+
+1. Raw HTTP 400 Errors
+2. Raw HTTP 500 Errors
+
+## Itens dependentes
 
 HTTP 4xx Errors<br>
 HTTP 400 Errors<br>
