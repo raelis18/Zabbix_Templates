@@ -1,7 +1,7 @@
 zabbix_export:
   version: '7.0'
   template_groups:
-    - uuid: 4d793d1ca19c4e8c9062042876ac6e8e
+    - uuid: 39a111a52e914fba98e065d64f35dbb7
       name: 'Templates GraphQL'
   templates:
     - uuid: fc314928ea0e4bb7ad09b420c8ba1c23
@@ -104,6 +104,12 @@ zabbix_export:
             key: HTTP400
           tags:
             - tag: 'HTTP Errors 400'
+          triggers:
+            - uuid: 1960c83d3e914a33a3c00fda8af186a7
+              expression: 'last(/Template GraphQL - HTTP Errors/QtdHttp4xx)>"{$HTTP_4xx_LIMIT}"'
+              name: 'Quantidade de erros HTTP 4xx maior que {$HTTP_4xx_LIMIT}'
+              status: DISABLED
+              priority: HIGH
         - uuid: e16c0828534f4e44906296935e2e7187
           name: 'HTTP 5xx Errors'
           type: DEPENDENT
@@ -117,6 +123,12 @@ zabbix_export:
             key: HTTP500
           tags:
             - tag: 'HTTP Errors 500'
+          triggers:
+            - uuid: 60cdd741f0154f62bd64c0ff7e9c86f3
+              expression: 'last(/Template GraphQL - HTTP Errors/QtdHttp5xx)>"{$HTTP_5xx_LIMIT}"'
+              name: 'Quantidade de erros HTTP 5xx maior que {$HTTP_5xx_LIMIT}'
+              status: DISABLED
+              priority: HIGH
         - uuid: 26394c23d5c94c3ab4c74bc2ce64fb47
           name: 'HTTP 400 Errors'
           type: DEPENDENT
@@ -130,6 +142,12 @@ zabbix_export:
             key: HTTP400
           tags:
             - tag: 'HTTP Errors 400'
+          triggers:
+            - uuid: 6575ed3a331145dda6d7ded8b154b8d6
+              expression: 'last(/Template GraphQL - HTTP Errors/QtdHttp400)>"{$HTTP_400_LIMIT}"'
+              name: 'Quantidade de erros HTTP 400 maior que {$HTTP_400_LIMIT}'
+              status: DISABLED
+              priority: HIGH
         - uuid: 169e2d2241834b40ba650ac1364858c9
           name: 'HTTP 403 Errors'
           type: DEPENDENT
@@ -143,6 +161,12 @@ zabbix_export:
             key: HTTP400
           tags:
             - tag: 'HTTP Errors 400'
+          triggers:
+            - uuid: 40f03a20e63b40b6aa347391913fbc03
+              expression: 'last(/Template GraphQL - HTTP Errors/QtdHttp403)>"{$HTTP_403_LIMIT}"'
+              name: 'Quantidade de erros HTTP 403 maior que {$HTTP_403_LIMIT}'
+              status: DISABLED
+              priority: HIGH
         - uuid: d49123fce2e44c859dea5bc4b5ce7c20
           name: 'HTTP 404 Errors'
           type: DEPENDENT
@@ -156,6 +180,12 @@ zabbix_export:
             key: HTTP400
           tags:
             - tag: 'HTTP Errors 400'
+          triggers:
+            - uuid: c16e732aba96462ba087883ab84fc5ab
+              expression: 'last(/Template GraphQL - HTTP Errors/QtdHttp404)>"{$HTTP_404_LIMIT}"'
+              name: 'Quantidade de erros HTTP 404 maior que {$HTTP_404_LIMIT}'
+              status: DISABLED
+              priority: HIGH
         - uuid: 2c0a475dc3de41f698ef4cd01c5cad11
           name: 'HTTP 500 Errors'
           type: DEPENDENT
@@ -169,6 +199,12 @@ zabbix_export:
             key: HTTP500
           tags:
             - tag: 'HTTP Errors 500'
+          triggers:
+            - uuid: 68e842e45f044451b1e9097829e6499d
+              expression: 'last(/Template GraphQL - HTTP Errors/QtdHttp500)>"{$HTTP_500_LIMIT}"'
+              name: 'Quantidade de erros HTTP 500 maior que {$HTTP_500_LIMIT}'
+              status: DISABLED
+              priority: HIGH
         - uuid: 4ed1a4f5afe04737bff94318ff9ede2a
           name: 'HTTP 502 Errors'
           type: DEPENDENT
@@ -182,6 +218,12 @@ zabbix_export:
             key: HTTP500
           tags:
             - tag: 'HTTP Errors 500'
+          triggers:
+            - uuid: 84dec06a699e46dab5c7bc9602098682
+              expression: 'last(/Template GraphQL - HTTP Errors/QtdHttp502)>"{$HTTP_502_LIMIT}"'
+              name: 'Quantidade de erros HTTP 502 maior que {$HTTP_502_LIMIT}'
+              status: DISABLED
+              priority: HIGH
         - uuid: 60d528d1d9ca442db0852f7bad6fb33d
           name: 'HTTP 503 Errors'
           type: DEPENDENT
@@ -195,7 +237,21 @@ zabbix_export:
             key: HTTP500
           tags:
             - tag: 'HTTP Errors 500'
+          triggers:
+            - uuid: 42a6762b6e6d46ff87a44c480122d99b
+              expression: 'last(/Template GraphQL - HTTP Errors/QtdHttp503)>"{$HTTP_503_LIMIT}"'
+              name: 'Quantidade de erros HTTP 503 maior que {$HTTP_503_LIMIT}'
+              status: DISABLED
+              priority: HIGH
       macros:
+        - macro: '{$HTTP_4XX_LIMIT}'
+        - macro: '{$HTTP_5XX_LIMIT}'
+        - macro: '{$HTTP_400_LIMIT}'
+        - macro: '{$HTTP_403_LIMIT}'
+        - macro: '{$HTTP_404_LIMIT}'
+        - macro: '{$HTTP_500_LIMIT}'
+        - macro: '{$HTTP_502_LIMIT}'
+        - macro: '{$HTTP_503_LIMIT}'
         - macro: '{$TOKEN}'
           description: 'Token para acesso a API do GraphQL'
         - macro: '{$URL}'
