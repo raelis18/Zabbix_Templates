@@ -1,5 +1,5 @@
 # Zabbix Template GraphQL
-Zabbix Versão 7 ou superior
+Zabbix Versão 7 ou superior<br>
 Template para coleta de Metricas do GraphQL
 
 <p>Macros utilizadas:</p>
