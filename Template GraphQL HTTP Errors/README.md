@@ -2,9 +2,9 @@
 Zabbix Versão 7 ou superior
 Template para coleta de Metricas do GraphQL
 
-<p>Macros utilizadas:</p><br>
+<p>Macros utilizadas:</p>
 {$TOKEN} - Token para acesso a API do GraphQL<br>
-{$URL} - Endereço API Metrics do Graphql. Ex : https://api.graphql/metrics/graphql<br>
+{$URL} - Endereço API Metrics do Graphql. Ex : https://api.graphql/metrics/graphql <br>
 
 Itens do tipo Script<br>
 
