@@ -30,9 +30,29 @@ Zabbix Versão 6 ou superior<br>
 15. {$POD_MEMORY_PERCENT_HIGH} - value: '95'
 
 
-## Itens do tipo Script
+## Itens do tipo http Agent
 
+Cluster CPU Usage % - AVG 2min
 
+Cluster CPU Core Total
+
+Cluster CPU Core Usage
+
+Cluster Filesystem Usage %
+
+Cluster Filesystem Total
+
+Cluster Filesystem Used
+
+Cluster Memory Usage %
+
+Cluster Memory Total
+
+Cluster Memory Usage
+
+Network IN
+
+Network OUT
 
 ## Itens dependentes
 
@@ -40,7 +60,13 @@ Zabbix Versão 6 ou superior<br>
 
 ## Triggers
 
+Cluster CPU used above {$CLUSTER_CPU_DISASTER}
 
+Cluster Filesystem used above {$CLUSTER_FILESYSTEM_DISASTER}
+
+Cluster Filesystem used above {$CLUSTER_FILESYSTEM_HIGH}
+
+Cluster Memory used above {$CLUSTER_MEMORY_DISASTER}
 
 
 
