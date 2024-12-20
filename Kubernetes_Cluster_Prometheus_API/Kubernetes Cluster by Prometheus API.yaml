@@ -1,0 +1,1362 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 801b081dad874c63a4bcc9d5707f3c25
+      name: 'Templates Kubernetes'
+  templates:
+    - uuid: fc0ac94785cb4365b1cf543e505e144a
+      template: 'Template Custom Kubernetes Cluster by Prometheus API'
+      name: 'Template Custom Kubernetes Cluster by Prometheus API'
+      groups:
+        - name: 'Templates Kubernetes'
+      items:
+        - uuid: 9b0785f6447448e387b97884a827d0fd
+          name: 'Cluster CPU Usage % - AVG 2min'
+          type: HTTP_AGENT
+          key: cluster.cpu.percent
+          delay: 2m
+          history: 90d
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..data..result..value[1].first()'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          posts: 'query=sum(rate(container_cpu_usage_seconds_total{id="/"}[2m]))/sum(machine_cpu_cores)*100'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster CPU'
+          triggers:
+            - uuid: 7ac53cb9555747c990c6c9c659ce835c
+              expression: 'last(/Template Custom Kubernetes Cluster by Prometheus API/cluster.cpu.percent)>={$CLUSTER_CPU_DISASTER}'
+              name: 'Cluster CPU used above {$CLUSTER_CPU_DISASTER}'
+              opdata: Evento
+              priority: DISASTER
+              description: 'Esse alerta refere-se ao uso de consumo de CPU da infraestrutura em cluster que suporta as aplicações do AKS PROD - Degust.'
+            - uuid: 245218642bf74fafb6dff4eb8f2dc7f2
+              expression: 'last(/Template Custom Kubernetes Cluster by Prometheus API/cluster.cpu.percent)>={$CLUSTER_CPU_HIGH}'
+              name: 'Cluster CPU used above {$CLUSTER_CPU_HIGH}'
+              opdata: Evento
+              priority: HIGH
+              description: 'Esse alerta refere-se ao uso de consumo de CPU  da infraestrutura em cluster que suporta as aplicações do AKS PROD - Degust.'
+        - uuid: 8c1dd27523fa40dbb336825385350b14
+          name: 'Cluster CPU Core Total'
+          type: HTTP_AGENT
+          key: cluster.CPU.total
+          delay: 3m
+          history: 90d
+          value_type: FLOAT
+          units: Core
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..data..result..value[1].first()'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          posts: query=sum(machine_cpu_cores)
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster CPU'
+        - uuid: f13e526deb1443ab9c8d7bdc647a7665
+          name: 'Cluster CPU Core Usage'
+          type: HTTP_AGENT
+          key: cluster.CPU.usage
+          delay: 2m
+          history: 90d
+          value_type: FLOAT
+          units: Core
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..data..result..value[1].first()'
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  valor = value
+                  retorno = parseFloat(valor)
+                  return retorno.toFixed(2)
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          posts: 'query=sum(rate(container_cpu_usage_seconds_total{id="/"}[2m]))'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster CPU'
+        - uuid: c027f8b05944470991de5b483eab9e7c
+          name: 'Cluster Filesystem Usage %'
+          type: HTTP_AGENT
+          key: cluster.filesystem.percent
+          delay: 3m
+          history: 90d
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..data..result..value[1].first()'
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  valor = value
+                  retorno = parseFloat(valor)
+                  return retorno.toFixed(2)
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          posts: 'query=sum(container_fs_usage_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/"})/sum(container_fs_limit_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/"})*100'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster Filesystem'
+          triggers:
+            - uuid: bb28640db41f4770aa31d715c8da6d3d
+              expression: 'last(/Template Custom Kubernetes Cluster by Prometheus API/cluster.filesystem.percent)>={$CLUSTER_FILESYSTEM_DISASTER}'
+              name: 'Cluster Filesystem used above {$CLUSTER_FILESYSTEM_DISASTER}'
+              opdata: Evento
+              priority: DISASTER
+              description: 'Esse alerta refere-se ao espaço em disco da infraestrutura em cluster que suporta as aplicações do AKS PROD - Degust.'
+            - uuid: 6eb237bc22f545fbacec3ce058a81b97
+              expression: 'last(/Template Custom Kubernetes Cluster by Prometheus API/cluster.filesystem.percent)>={$CLUSTER_FILESYSTEM_HIGH}'
+              name: 'Cluster Filesystem used above {$CLUSTER_FILESYSTEM_HIGH}'
+              opdata: Evento
+              priority: HIGH
+              description: 'Esse alerta refere-se ao espaço em disco da infraestrutura em cluster que suporta as aplicações do AKS PROD - Degust.'
+        - uuid: c11fd0d427a1419aa5871e62668cc6b2
+          name: 'Cluster Filesystem Total'
+          type: HTTP_AGENT
+          key: cluster.Filesystem.total
+          delay: 3m
+          history: 90d
+          value_type: FLOAT
+          units: b
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..data..result..value[1].first()'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query?query=sum(container_fs_limit_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/"})'
+          posts: 'query=sum(container_fs_limit_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/"})'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster Filesystem'
+        - uuid: e96239c8015c4533b8555f0dab2f77a1
+          name: 'Cluster Filesystem Used'
+          type: HTTP_AGENT
+          key: cluster.Filesystem.Used
+          delay: 3m
+          history: 90d
+          value_type: FLOAT
+          units: b
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..data..result..value[1].first()'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query?query=sum(container_fs_usage_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/"})'
+          tags:
+            - tag: Application
+              value: 'Cluster Filesystem'
+        - uuid: 004a5bf76973441dbcdd5829fea14e35
+          name: 'Cluster Memory Usage %'
+          type: HTTP_AGENT
+          key: cluster.memory.percent
+          delay: 3m
+          history: 90d
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..data..result..value[1].first()'
+          timeout: 3s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          posts: 'query=sum(container_memory_working_set_bytes{id="/"})/sum(machine_memory_bytes)*100'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster Memory'
+          triggers:
+            - uuid: 5c6c8b1e751f4139b87a96e5f72fbfab
+              expression: 'avg(/Template Custom Kubernetes Cluster by Prometheus API/cluster.memory.percent,#2)>={$CLUSTER_MEMORY_DISASTER}'
+              name: 'Cluster Memory used above {$CLUSTER_MEMORY_DISASTER}'
+              opdata: Evento
+              priority: DISASTER
+              description: 'Esse alerta refere-se ao uso de memória das aplicações do AKS PROD - Degust'
+            - uuid: a97cae26273a4fa8a27908fd89d87fc5
+              expression: 'avg(/Template Custom Kubernetes Cluster by Prometheus API/cluster.memory.percent,#2)>={$CLUSTER_MEMORY_HIGH}'
+              name: 'Cluster Memory used above {$CLUSTER_MEMORY_HIGH}'
+              opdata: Evento
+              priority: HIGH
+              description: 'Esse alerta refere-se ao uso de memória das aplicações do AKS PROD - Degust'
+        - uuid: 61b589b4782e4f9e8dd425b763870e42
+          name: 'Cluster Memory Total'
+          type: HTTP_AGENT
+          key: cluster.memory.total
+          delay: 3m
+          history: 90d
+          value_type: FLOAT
+          units: b
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..data..result..value[1].first()'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          posts: query=sum(machine_memory_bytes)
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster Memory'
+        - uuid: 14d725361a7a45f2b86d7f9189818bc9
+          name: 'Cluster Memory Usage'
+          type: HTTP_AGENT
+          key: cluster.memory.usage
+          delay: 3m
+          history: 90d
+          value_type: FLOAT
+          units: b
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..data..result..value[1].first()'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          posts: 'query=sum(container_memory_working_set_bytes{id="/"})'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster Memory'
+        - uuid: 6f96ddba96fe4135bc5dc814b83f0ceb
+          name: 'Network IN'
+          type: HTTP_AGENT
+          key: cluster.network.in
+          delay: 3m
+          history: 90d
+          value_type: FLOAT
+          units: b
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..data..result..value[1].first()'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          posts: 'query=sum(rate(container_network_receive_bytes_total[2m]))'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster Network'
+        - uuid: afb6e048a8444fb5ba89d500458c3464
+          name: 'Network OUT'
+          type: HTTP_AGENT
+          key: cluster.network.out
+          delay: 3m
+          history: 90d
+          value_type: FLOAT
+          units: b
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..data..result..value[1].first()'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          posts: 'query=sum(rate(container_network_transmit_bytes_total[2m]))'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster Network'
+        - uuid: 35df4ef0cde64b079b961c31b9a5d916
+          name: 'Conntrack Table Entries'
+          type: CALCULATED
+          key: contrack.table.entries
+          history: 90d
+          value_type: FLOAT
+          params: last(//max.conntrack.table.entries)/last(//min.conntrack.table.entries.limit)
+          tags:
+            - tag: Application
+              value: 'Cluster General'
+        - uuid: 5ee8844bed824521960b3728a5e13c08
+          name: 'Discover ID'
+          type: HTTP_AGENT
+          key: discover.ID
+          delay: 30m
+          history: 90d
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..result..metric.id
+            - type: REGEX
+              parameters:
+                - '[(-Za-z0-9"{}/\_)]+'
+                - \0
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  value = value.replace(/,/g , "},{\"id\":")
+                  value = ("[{\"id\":"+value+"}]")
+                  return value
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          posts: 'query=container_processes{namespace=~"{$NAMESPACE}"}'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: Discovers
+        - uuid: db2c44884ad04ac6a3a1127880f2fa24
+          name: 'Discover Instances'
+          type: HTTP_AGENT
+          key: discover.instaces
+          delay: 30m
+          history: 90d
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..result..metric.instance
+            - type: REGEX
+              parameters:
+                - '[(-Za-z0-9"{}.:)]+'
+                - \0
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  value = value.replace(/,/g , "},{\"instance\":")
+                  value = ("[{\"instance\":"+value+"}]")
+                  return value
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          posts: 'query=node_nf_conntrack_entries{} > 0'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: Discovers
+        - uuid: 8c7b7c7cbaef45478636ae940b87afa6
+          name: 'Discover Node'
+          type: HTTP_AGENT
+          key: discover.node
+          delay: 30m
+          history: 90d
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..result..metric.node
+            - type: REGEX
+              parameters:
+                - '[(-Za-z0-9"{}.:)]+'
+                - \0
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  value = value.replace(/,/g , "},{\"node\":")
+                  value = ("[{\"node\":"+value+"}]")
+                  return value
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          follow_redirects: 'NO'
+          posts: 'query=kube_node_status_condition{status="true",condition="Ready"}'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: Discovers
+        - uuid: e8aedabce4554ea0adbb8cfd6c912fcf
+          name: 'Discover PODS'
+          type: HTTP_AGENT
+          key: discover.pods
+          delay: 30m
+          history: 90d
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..result..metric.pod
+            - type: REGEX
+              parameters:
+                - '[(-Za-z0-9"{})]+'
+                - \0
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  value = value.replace(/,/g , "},{\"pod\":")
+                  value = ("[{\"pod\":"+value+"}]")
+                  return value
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          posts: 'query=kube_pod_container_info{namespace="{$NAMESPACE}"}'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: Discovers
+        - uuid: 96d8e4178c274caf9828fcfc0d15574c
+          name: 'Get Volumes'
+          type: HTTP_AGENT
+          key: get.kubelet_volume
+          delay: 30m
+          history: 90d
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $..data..result..metric..persistentvolumeclaim
+            - type: REGEX
+              parameters:
+                - '[(-Za-z0-9"{})]+'
+                - \0
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  value = value.replace(/,/g , "},{\"volume\":")
+                  value = ("[{\"volume\":"+value+"}]")
+                  return value
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          follow_redirects: 'NO'
+          posts: query=kubelet_volume_stats_available_bytes
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: Discovers
+        - uuid: af9737d14e554964a1328aa04b5c58d2
+          name: 'Max Node Conntrack Table Entries'
+          type: HTTP_AGENT
+          key: max.conntrack.table.entries
+          history: 90d
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..result..value[1].sum()'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          follow_redirects: 'NO'
+          posts: 'query=max(node_nf_conntrack_entries{})'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster General'
+        - uuid: 06df33000b1c4c7e93369c4c505874c7
+          name: 'Min Node Conntrack Table Entries Limit'
+          type: HTTP_AGENT
+          key: min.conntrack.table.entries.limit
+          history: 90d
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..result..value[1].sum()'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          follow_redirects: 'NO'
+          posts: 'query=min(node_nf_conntrack_entries_limit{})'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster General'
+        - uuid: 6846eb569758423a8d1960c904219c36
+          name: 'Pods Falied Count'
+          type: HTTP_AGENT
+          key: Pods.Failed.Count
+          history: 90d
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..result..value[1].first()'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          follow_redirects: 'NO'
+          posts: 'query=sum (kube_pod_status_phase{phase=~"Failed"}) & kubelet_running_pod_count{kubernetes_io_role =~ ".*node.*"}'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster General'
+        - uuid: 4e8cf73b1de34f3ba5d737e06effe2df
+          name: 'Pods Pending Count'
+          type: HTTP_AGENT
+          key: Pods.Pending.Count
+          history: 90d
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..result..value[1].first()'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          follow_redirects: 'NO'
+          posts: 'query=sum (kube_pod_status_phase{phase=~"Pending"}) & kubelet_running_pod_count{kubernetes_io_role =~ ".*node.*"}'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster General'
+        - uuid: db8125c04cdb44f5b8d1a0db1c39f85e
+          name: 'Pods restarted'
+          type: HTTP_AGENT
+          key: Pods.Restart
+          delay: 5m
+          history: 90d
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..result..value[1].sum()'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          follow_redirects: 'NO'
+          posts: 'query=(delta(kube_pod_container_status_restarts_total[5m])>0)'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster General'
+        - uuid: a8c025f769a34706941de1400e297926
+          name: 'Pods Running Count'
+          type: HTTP_AGENT
+          key: Pods.Running.Count
+          history: 90d
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..result..value[1].first()'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          follow_redirects: 'NO'
+          posts: 'query=sum (kube_pod_status_phase{phase=~"Running"}) & kubelet_running_pod_count{kubernetes_io_role =~ ".*node.*"}'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster General'
+        - uuid: e5abdc3510c347d588be9c2b61575200
+          name: 'Pods Succeeded Count'
+          type: HTTP_AGENT
+          key: Pods.Succeeded.Count
+          history: 90d
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..result..value[1].first()'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          follow_redirects: 'NO'
+          posts: 'query=sum (kube_pod_status_phase{phase=~"Succeeded"}) & kubelet_running_pod_count{kubernetes_io_role =~ ".*node.*"}'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster General'
+        - uuid: 91c895fe81544199888fb56adbc0a19a
+          name: 'Pods Unknown Count'
+          type: HTTP_AGENT
+          key: Pods.Unknown.Count
+          history: 90d
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$..result..value[1].first()'
+          timeout: 30s
+          url: '{$ENDPOINT_URL}/api/v1/query'
+          follow_redirects: 'NO'
+          posts: 'query=sum (kube_pod_status_phase{phase=~"Unknown"}) & kubelet_running_pod_count{kubernetes_io_role =~ ".*node.*"}'
+          headers:
+            - name: Content-Type
+              value: application/x-www-form-urlencoded
+          request_method: POST
+          tags:
+            - tag: Application
+              value: 'Cluster General'
+      discovery_rules:
+        - uuid: 83fdaf4228924303ad5d082e21c5743d
+          name: 'Discover Instance'
+          type: DEPENDENT
+          key: discover.instance
+          delay: '0'
+          lifetime: 1d
+          item_prototypes:
+            - uuid: 746f4f054df447da9195bc1c856ae3f4
+              name: 'Node Contract Entries - {#INSTANCE}'
+              type: HTTP_AGENT
+              key: 'node.contract.entries[{#INSTANCE}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..result..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=node_nf_conntrack_entries{instance=~"{#INSTANCE}"}'
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Conntrack Table Utilization'
+          master_item:
+            key: discover.instaces
+          lld_macro_paths:
+            - lld_macro: '{#INSTANCE}'
+              path: $..instance.first()
+        - uuid: 38f9980bb7bd4e639d9b223d3893f115
+          name: IDs
+          type: DEPENDENT
+          key: discover.metrics.id
+          delay: '0'
+          lifetime: 1d
+          item_prototypes:
+            - uuid: acc293a9ef7e47248878bf71c1e54abd
+              name: 'Processes ID {#ID} CPU usage (1m avg)'
+              type: HTTP_AGENT
+              key: 'processes.id.cpu.usage[{#ID}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: Core
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..data..result..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      valor = value
+                      retorno = parseFloat(valor)
+                      return retorno.toFixed(2)
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=sum(rate(container_cpu_usage_seconds_total{id!="{#ID}"}[1m]))'
+              headers:
+                - name: Content-Type
+                  value: application/x-www-form-urlencoded
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Processes CPU'
+            - uuid: 8c6b3948f7a44463b9c14dee94a7e7fb
+              name: 'Processes ID {#ID} Memory usage'
+              type: HTTP_AGENT
+              key: 'processes.id.memory.usage[{#ID}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..data..result..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=sum(rate(container_memory_working_set_bytes{id!="{#ID}"}[1m]))'
+              headers:
+                - name: Content-Type
+                  value: application/x-www-form-urlencoded
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Processes Memory'
+            - uuid: 5b6d0949df724be58b00ef2c3ef6c139
+              name: 'Network IN - Processes ID {#ID}'
+              type: HTTP_AGENT
+              key: 'processes.id.network.in[{#ID}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              discover: NO_DISCOVER
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..data..result..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=sum(rate(container_network_receive_bytes_total{id!="{#ID}"}[1m]))'
+              headers:
+                - name: Content-Type
+                  value: application/x-www-form-urlencoded
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Processes Network'
+            - uuid: ef6a96d9399c45a9b69d9e26b59e8faf
+              name: 'Network OUT - Processes ID {#ID}'
+              type: HTTP_AGENT
+              key: 'processes.id.network.out[{#ID}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              discover: NO_DISCOVER
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..data..result..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=sum(rate(container_network_transmit_bytes_total{id!="{#ID}"}[1m]))'
+              headers:
+                - name: Content-Type
+                  value: application/x-www-form-urlencoded
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Processes Network'
+          master_item:
+            key: discover.ID
+          lld_macro_paths:
+            - lld_macro: '{#ID}'
+              path: $..id.first()
+        - uuid: 764edb8e00b748399c1aa79d03e71feb
+          name: Pods
+          type: DEPENDENT
+          key: discover.metrics.pods
+          delay: '0'
+          filter:
+            conditions:
+              - macro: '{#POD}'
+                value: '(.*cron.*)'
+                operator: NOT_MATCHES_REGEX
+                formulaid: A
+          lifetime_type: DELETE_IMMEDIATELY
+          lifetime: '0'
+          item_prototypes:
+            - uuid: 7850b35037e44a38b53638dcfcfed92a
+              name: 'Pod - {#POD} - CPU Percentage Usage - AVG 2m'
+              type: CALCULATED
+              key: 'pod.cpu.percent.usage[{#POD}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: '%'
+              params: 'last(//pod.cpu.usage[{#POD}]) / last(//pod.cpu.total[{#POD}]) * 100'
+              tags:
+                - tag: Application
+                  value: 'POD CPU'
+              trigger_prototypes:
+                - uuid: e10cc51ae777402f974309094bb57fc9
+                  expression: 'avg(/Template Custom Kubernetes Cluster by Prometheus API/pod.cpu.percent.usage[{#POD}],10m)>={$POD_CPU_PERCENT_DISASTER}'
+                  name: 'POD - {#POD} - A média de consumo de CPU está acima de {$POD_CPU_PERCENT_DISASTER}% (AVG 10min))'
+                  opdata: Evento
+                  status: DISABLED
+                  priority: INFO
+                - uuid: eacea0571d914e18a07da3cd6989ab6c
+                  expression: 'avg(/Template Custom Kubernetes Cluster by Prometheus API/pod.cpu.percent.usage[{#POD}],10m)>={$POD_CPU_PERCENT_HIGH}'
+                  name: 'POD - {#POD} - A média de consumo de CPU está acima de {$POD_CPU_PERCENT_HIGH}% (AVG 10min)'
+                  opdata: Evento
+                  status: DISABLED
+                  priority: INFO
+                  dependencies:
+                    - name: 'POD - {#POD} - A média de consumo de CPU está acima de {$POD_CPU_PERCENT_DISASTER}% (AVG 10min))'
+                      expression: 'avg(/Template Custom Kubernetes Cluster by Prometheus API/pod.cpu.percent.usage[{#POD}],10m)>={$POD_CPU_PERCENT_DISASTER}'
+                - uuid: 44fda12f815445c583129a97b0f04a99
+                  expression: 'avg(/Template Custom Kubernetes Cluster by Prometheus API/pod.cpu.percent.usage[{#POD}],20m)>={$POD_CPU_WARNING}'
+                  name: 'POD - {#POD} - A média de consumo de CPU está acima de {$POD_CPU_WARNING}% (AVG 20min)'
+                  opdata: Evento
+                  status: DISABLED
+                  priority: INFO
+                  dependencies:
+                    - name: 'POD - {#POD} - A média de consumo de CPU está acima de {$POD_CPU_PERCENT_HIGH}% (AVG 10min)'
+                      expression: 'avg(/Template Custom Kubernetes Cluster by Prometheus API/pod.cpu.percent.usage[{#POD}],10m)>={$POD_CPU_PERCENT_HIGH}'
+            - uuid: a5cd4ef6cee2471e93d832a18097049e
+              name: 'Pod - {#POD} - CPU Total'
+              type: HTTP_AGENT
+              key: 'pod.cpu.total[{#POD}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: Core
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..data..result..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '-1'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=kube_pod_container_resource_limits{resource="cpu", namespace="{$NAMESPACE}",pod="{#POD}"}'
+              headers:
+                - name: Content-Type
+                  value: application/x-www-form-urlencoded
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'POD CPU'
+            - uuid: 904d2ef85613452a9bb207d198b7945d
+              name: 'Pod - {#POD} - CPU Usage - AVG 2m'
+              type: HTTP_AGENT
+              key: 'pod.cpu.usage[{#POD}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: Core
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..data..result..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+                - type: JAVASCRIPT
+                  parameters:
+                    - |
+                      valor = value
+                      retorno = parseFloat(valor)
+                      return retorno.toFixed(2)
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=sum(rate(container_cpu_usage_seconds_total{pod="{#POD}"}[2m]))'
+              headers:
+                - name: Content-Type
+                  value: application/x-www-form-urlencoded
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'POD CPU'
+            - uuid: 295c7250bcd64273a4ee19c760769952
+              name: 'Pod - {#POD} - Memory percentage usage'
+              type: CALCULATED
+              key: 'pod.memory.percent.usage[{#POD}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: '%'
+              params: |
+                last(//pod.memory.usage[{#POD}]) / 	
+                last(//pod.memory.total[{#POD}])* 100
+              tags:
+                - tag: Application
+                  value: 'POD Memory'
+              trigger_prototypes:
+                - uuid: 1bf663ecf71e40e88a9c897a3d0db1be
+                  expression: 'avg(/Template Custom Kubernetes Cluster by Prometheus API/pod.memory.percent.usage[{#POD}],10m)>={$POD_MEMORY_PERCENT_DISASTER}'
+                  name: 'POD - {#POD} - A média de consumo de Memória está acima de {$POD_MEMORY_PERCENT_DISASTER}% (AVG 10min)'
+                  opdata: Evento
+                  status: DISABLED
+                  priority: INFO
+                - uuid: fa9849199e0a416aac754aeaae6b0806
+                  expression: 'avg(/Template Custom Kubernetes Cluster by Prometheus API/pod.memory.percent.usage[{#POD}],10s)>={$POD_MEMORY_PERCENT_HIGH}'
+                  name: 'POD - {#POD} - A média do consumo de Memoria está acima de {$POD_MEMORY_PERCENT_HIGH}% (AVG 10min)'
+                  opdata: Evento
+                  status: DISABLED
+                  priority: INFO
+                  dependencies:
+                    - name: 'POD - {#POD} - A média de consumo de Memória está acima de {$POD_MEMORY_PERCENT_DISASTER}% (AVG 10min)'
+                      expression: 'avg(/Template Custom Kubernetes Cluster by Prometheus API/pod.memory.percent.usage[{#POD}],10m)>={$POD_MEMORY_PERCENT_DISASTER}'
+            - uuid: 53693062bf0e47cb8cf55d0faa701ab1
+              name: 'Pod - {#POD} - Memory Total'
+              type: HTTP_AGENT
+              key: 'pod.memory.total[{#POD}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..data..result..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '-1'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=kube_pod_container_resource_limits{resource="memory", namespace="{$NAMESPACE}",pod="{#POD}"}'
+              headers:
+                - name: Content-Type
+                  value: application/x-www-form-urlencoded
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'POD Memory'
+            - uuid: cf3cad8b1dd04c6ab4c1795c9a9c3e7c
+              name: 'Pod - {#POD} - Memory Usage'
+              type: HTTP_AGENT
+              key: 'pod.memory.usage[{#POD}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..data..result..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '-1'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=container_memory_working_set_bytes{pod="{#POD}"}'
+              headers:
+                - name: Content-Type
+                  value: application/x-www-form-urlencoded
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'POD Memory'
+            - uuid: ad88baeef5d146b9aa206f1e2f508df0
+              name: 'Pod - {#POD} - Network IN'
+              type: HTTP_AGENT
+              key: 'pod.network.in[{#POD}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..data..result..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '-1'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=sum(rate(container_network_receive_bytes_total{pod="{#POD}"}[2m]))'
+              headers:
+                - name: Content-Type
+                  value: application/x-www-form-urlencoded
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'POD - Network'
+            - uuid: 5a7537f851d343cf8602b51d123c0e8c
+              name: 'Pod - {#POD} - Network OUT'
+              type: HTTP_AGENT
+              key: 'pod.network.out[{#POD}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..data..result..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=sum(rate(container_network_transmit_bytes_total{pod="{#POD}"}[2m]))'
+              headers:
+                - name: Content-Type
+                  value: application/x-www-form-urlencoded
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'POD - Network'
+            - uuid: 73506f18504c4098ad15686bdde4a843
+              name: 'Pod - {#POD} - Status'
+              type: HTTP_AGENT
+              key: 'pod.running.status[{#POD}]'
+              delay: 5m
+              history: 90d
+              valuemap:
+                name: 'POD Running Status'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..data..result..value[1].first()'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=kube_pod_container_status_running{pod="{#POD}"}'
+              headers:
+                - name: Content-Type
+                  value: application/x-www-form-urlencoded
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'POD - Status'
+              trigger_prototypes:
+                - uuid: 741250fc706b45dab485ec5c0612eba9
+                  expression: 'last(/Template Custom Kubernetes Cluster by Prometheus API/pod.running.status[{#POD}])=0'
+                  name: 'POD - {#POD} - STOPPED'
+                  opdata: Evento
+                  status: DISABLED
+                  priority: INFO
+                  description: 'Esse alerta refere-se as instâncias de aplicações do produto Degust o que pode ocasionar em indisponibilidade da aplicação.'
+          master_item:
+            key: discover.pods
+          lld_macro_paths:
+            - lld_macro: '{#POD}'
+              path: $..pod.first()
+        - uuid: 42b6acb8feaf44278e9e1e91f9fdbf64
+          name: 'Discover Node'
+          type: DEPENDENT
+          key: discover.nodes
+          delay: '0'
+          lifetime: 1d
+          item_prototypes:
+            - uuid: 09477156490d4b91b9bdc9b1e59043fc
+              name: 'Node CPU usage % - AVG10 - {#NODE}'
+              type: HTTP_AGENT
+              key: 'node.cpu.usage.percent[{#NODE}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..result..value[1].avg()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=avg(1 - rate(node_cpu_seconds_total{mode="idle", node=~"{#NODE}"}[5m]))'
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Node CPU'
+            - uuid: b327b3757c054a738977dc509ad1f3f6
+              name: 'Node memory Buffers - AVG5 - {#NODE}'
+              type: HTTP_AGENT
+              key: 'node.memory.buffers[{#NODE}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..result..value[1].avg()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '-1'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=avg_over_time(node_memory_Buffers_bytes{node=~"{#NODE}"}[5m])'
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Node Memory'
+            - uuid: 56547041469d47c79f2d1acc214d3f03
+              name: 'Node memory Cached - AVG5 - {#NODE}'
+              type: HTTP_AGENT
+              key: 'node.memory.cached[{#NODE}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..result..value[1].avg()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '-1'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=avg_over_time(node_memory_Cached_bytes{node=~"{#NODE}"}[5m])'
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Node Memory'
+            - uuid: c1fc203b3bb44781837c07adaca4855b
+              name: 'Node memory free - AVG5 - {#NODE}'
+              type: HTTP_AGENT
+              key: 'node.memory.free[{#NODE}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..result..value[1].avg()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '-1'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=avg_over_time(node_memory_MemFree_bytes{node=~"{#NODE}"}[5m])'
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Node Memory'
+            - uuid: c8c9ea0bfc904579b5bc017ff298e795
+              name: 'Node memory Total - AVG5 - {#NODE}'
+              type: HTTP_AGENT
+              key: 'node.memory.total[{#NODE}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..result..value[1].avg()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '-1'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=avg_over_time(node_memory_MemTotal_bytes{node=~"{#NODE}"}[5m])'
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Node Memory'
+            - uuid: 8288774d10234245b30b8f6a446052b8
+              name: 'Node memory usage % - {#NODE}'
+              type: CALCULATED
+              key: 'node.memory.usage.percent[{#NODE}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: '%'
+              params: '100 * (1 -(last(//node.memory.free[{#NODE}]) + last(//node.memory.cached[{#NODE}]) + last(//node.memory.buffers[{#NODE}])) / last(//node.memory.total[{#NODE}]))'
+              tags:
+                - tag: Application
+                  value: 'Node Memory'
+            - uuid: 84e2e3b4075b4b22bf6b2947dfdacdc8
+              name: 'Node Memory Used - {#NODE}'
+              type: CALCULATED
+              key: 'node.memory.used[{#NODE}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: b
+              params: 'last(//node.memory.total[{#NODE}]) - (last(//node.memory.free[{#NODE}])+ last(//node.memory.cached[{#NODE}]) + last(//node.memory.buffers[{#NODE}]))'
+              tags:
+                - tag: Application
+                  value: 'Node Memory'
+          master_item:
+            key: discover.node
+          lld_macro_paths:
+            - lld_macro: '{#NODE}'
+              path: $..node.first()
+        - uuid: 194acf1369664bb4a593adb7f350ca20
+          name: 'Discover Volumes'
+          type: DEPENDENT
+          key: discover.volumes
+          delay: '0'
+          lifetime: 1d
+          item_prototypes:
+            - uuid: 38ace5be80cc4467a6155119055bd30a
+              name: 'Volume Avaliable Bytes - {#VOLUME}'
+              type: HTTP_AGENT
+              key: 'kubelet_volume_stats_available_bytes[{#VOLUME}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=kubelet_volume_stats_available_bytes{persistentvolumeclaim="{#VOLUME}"}'
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Cluster Volumes'
+            - uuid: 0c0fc2d3494343d78eba70cd24626d2c
+              name: 'Total Volume Bytes - {#VOLUME}'
+              type: HTTP_AGENT
+              key: 'kubelet_volume_stats_capacity_bytes[{#VOLUME}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=kubelet_volume_stats_capacity_bytes{persistentvolumeclaim="{#VOLUME}"}'
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Cluster Volumes'
+            - uuid: 5a9b47db94464f0ea44f640a0ffea7b5
+              name: 'Used Bytes Volume - {#VOLUME}'
+              type: HTTP_AGENT
+              key: 'kubelet_volume_stats_used_bytes[{#VOLUME}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: b
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=kubelet_volume_stats_used_bytes{persistentvolumeclaim="{#VOLUME}"}'
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Cluster Volumes'
+            - uuid: 057fac9b4a9941fc86394f837524c875
+              name: 'Used % Volume - {#VOLUME}'
+              type: HTTP_AGENT
+              key: 'UsedPercentVolume[{#VOLUME}]'
+              delay: 5m
+              history: 90d
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$..value[1].first()'
+                  error_handler: CUSTOM_VALUE
+                  error_handler_params: '0'
+              timeout: 30s
+              url: '{$ENDPOINT_URL}/api/v1/query'
+              posts: 'query=kubelet_volume_stats_used_bytes{persistentvolumeclaim="{#VOLUME}"} / kubelet_volume_stats_capacity_bytes{persistentvolumeclaim="{#VOLUME}"} * 100'
+              request_method: POST
+              tags:
+                - tag: Application
+                  value: 'Cluster Volumes'
+              trigger_prototypes:
+                - uuid: d4ce309ba77c41a2803c42212d92f9d8
+                  expression: 'last(/Template Custom Kubernetes Cluster by Prometheus API/UsedPercentVolume[{#VOLUME}])>=85'
+                  name: 'Espaco utilizado no volume {#VOLUME} - igual a 85%'
+                  opdata: Evento
+                  status: DISABLED
+                  priority: WARNING
+                  dependencies:
+                    - name: 'Espaco utilizado no volume {#VOLUME} - igual a 90%'
+                      expression: 'last(/Template Custom Kubernetes Cluster by Prometheus API/UsedPercentVolume[{#VOLUME}])>=90'
+                - uuid: 62c0c81daadf470498c12fcc05072ff0
+                  expression: 'last(/Template Custom Kubernetes Cluster by Prometheus API/UsedPercentVolume[{#VOLUME}])>=90'
+                  name: 'Espaco utilizado no volume {#VOLUME} - igual a 90%'
+                  opdata: Evento
+                  priority: AVERAGE
+          master_item:
+            key: get.kubelet_volume
+          lld_macro_paths:
+            - lld_macro: '{#VOLUME}'
+              path: $..volume.first()
+      httptests:
+        - uuid: afd14b746c1c4065b58cc7bba5e74bb7
+          name: 'Endpoint Prometheus {$ENDPOINT_URL}'
+          steps:
+            - name: 'Endpoint Prometheus {$ENDPOINT_URL}'
+              url: '{$ENDPOINT_URL}'
+              timeout: 60s
+              status_codes: '200'
+          tags:
+            - tag: Application
+              value: 'Endpoint Status'
+      macros:
+        - macro: '{$CLUSTER_CPU_DISASTER}'
+          value: '95'
+        - macro: '{$CLUSTER_CPU_HIGH}'
+          value: '90'
+        - macro: '{$CLUSTER_FILESYSTEM_DISASTER}'
+          value: '95'
+        - macro: '{$CLUSTER_FILESYSTEM_HIGH}'
+          value: '93'
+        - macro: '{$CLUSTER_MEMORY_DISASTER}'
+          value: '98'
+        - macro: '{$CLUSTER_MEMORY_HIGH}'
+          value: '95'
+        - macro: '{$ENDPOINT_URL}'
+        - macro: '{$NAMESPACE}'
+          value: dev
+        - macro: '{$POD_CPU_DISASTER}'
+          value: '2'
+        - macro: '{$POD_CPU_HIGH}'
+          value: '1'
+        - macro: '{$POD_CPU_PERCENT_DISASTER}'
+          value: '95'
+        - macro: '{$POD_CPU_PERCENT_HIGH}'
+          value: '90'
+        - macro: '{$POD_CPU_WARNING}'
+          value: '80'
+        - macro: '{$POD_MEMORY_PERCENT_DISASTER}'
+          value: '98'
+        - macro: '{$POD_MEMORY_PERCENT_HIGH}'
+          value: '95'
+      valuemaps:
+        - uuid: 4888b3340b0a42f8b22c15cf8af88f4d
+          name: 'POD Running Status'
+          mappings:
+            - value: '1'
+              newvalue: Running
+            - value: '0'
+              newvalue: Stopped
+  triggers:
+    - uuid: c6b2499985ca4b77970b0b62bf9b3319
+      expression: 'last(/Template Custom Kubernetes Cluster by Prometheus API/web.test.fail[Endpoint Prometheus {$ENDPOINT_URL}])>0'
+      name: 'Falha no Endpoint Prometheus - {$ENDPOINT_URL}'
+      opdata: Incidente
+      priority: DISASTER
+      description: 'Esse alerta refere-se a estrutura que comporta toda as aplicações, caso haja falha no endpoint todas as aplicações ficaram indisponíveis.'
