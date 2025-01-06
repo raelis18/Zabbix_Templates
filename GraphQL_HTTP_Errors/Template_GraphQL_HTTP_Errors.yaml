@@ -25,8 +25,8 @@ zabbix_export:
             var subpage = obj.subpage;
             var request = new HttpRequest();
             var data = new Date()
-            var data_fim_utc = data.getFullYear() + "-" + (data.getMonth()+1) + "-" + data.getDate() + "T" + data.getUTCHours() + ":" + data.getUTCMinutes() + ":" + data.getUTCSeconds();
-            var data_inicio_utc   =   data.getFullYear() + "-" + (data.getMonth()+1) + "-" + data.getDate() + "T" + data.getUTCHours() + ":" + (data.getUTCMinutes()-7) + ":" + data.getUTCSeconds();
+            var data_fim_utc = data.getFullYear() + "-" + ("0" + data.getMonth()+1).slice(-2) + "-" + ("0" + data.getDate()).slice(-2) + "T" + data.getUTCHours() + ":" + data.getUTCMinutes() + ":" + data.getUTCSeconds();
+            var data_inicio_utc   =   data.getFullYear() + "-" + ("0" + data.getMonth()+1).slice(-2) + "-" + ("0" + data.getDate()).slice(-2) + "T" + data.getUTCHours() + ":" + (data.getUTCMinutes()-7) + ":" + data.getUTCSeconds();
             
             request.addHeader("Content-Type: application/json")
             request.addHeader("Authorization:Token "+obj.token)
